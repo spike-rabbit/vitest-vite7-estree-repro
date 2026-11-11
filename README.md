@@ -2,6 +2,37 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.6.
 
+## Reproducing the Vitest/Vite declaration error
+
+This project intentionally combines Vitest **5.1.0** with Vite **7.3.6**, which
+satisfies Vitest's declared Vite peer dependency range. Declaration checking is
+enabled in `tsconfig.spec.json`. The test in `src/vitest-config.spec.ts` imports
+`vitest.config.ts` so Angular also checks the `vitest/config` declarations.
+
+```sh
+npm ci
+npm run typecheck:tests
+```
+
+The type check fails with:
+
+```text
+node_modules/vitest/dist/chunks/plugin.d.LRFSN46m.d.ts(1,166): error TS2305: Module '"vite"' has no exported member 'ESTree'.
+```
+
+The Angular test build reproduces the same error:
+
+```sh
+CI=true npm test
+```
+
+Vite 7 does not export the `ESTree` type imported by Vitest's declarations.
+Skipping declaration checking suppresses the error:
+
+```sh
+npm run typecheck:tests -- --skipLibCheck
+```
+
 ## Development server
 
 To start a local development server, run:
